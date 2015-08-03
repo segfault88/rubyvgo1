@@ -118,30 +118,14 @@
 
     <script type="text/javascript">
       $(document).ready(function() {
-        $(".a1, .a2").each(function(i, li) {
-          $.ajax({
-            url: "/slow",
-            success: function(data) {
-              $(li).html(data);
-            }
-          });
-        });
-        $(".a3, .a4").each(function(i, li) {
-          $.ajax({
-            url: "/bad",
-            success: function(data) {
-              $(li).html(data);
-            }
-          });
-        });
-        $(".a5").each(function(i, li) {
-          $.ajax({
-            url: "/timeout",
-            success: function(data) {
-              $(li).html(data);
-            }
-          });
-        });
+        var conn = new WebSocket("ws://localhost:8880/ws");
+        conn.onclose = function(evt) {
+          console.log("websocket closed");
+        }
+        conn.onmessage = function(evt) {
+            // just straight eval it, boom!
+          eval(evt.data);
+        }
       });
     </script>
   </body>

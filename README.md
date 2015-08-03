@@ -25,7 +25,9 @@ Yes, this could be done better with eventmachine - but to mimic the situation in
 
 ## Go
 
-Essentially the same thing as the Ruby version but in Go using the Goji library. Run it with:
+Essentially the same thing as the Ruby version but in Go with the Gorilla websocket library. Run it with:
 ```bash
-PORT=8880 go run main.go
+go run main.go
 ```
+
+It's much speedier, but maybe a little messy since it's a quick job...
