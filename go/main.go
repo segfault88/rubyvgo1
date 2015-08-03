@@ -1,18 +1,21 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
-
-	"github.com/zenazn/goji"
-	"github.com/zenazn/goji/web"
 )
 
 const Port = 8000
 
-func root(c web.C, w http.ResponseWriter, r *http.Request) {
+var (
+	addr = flag.String("addr", ":8880", "http service address")
+)
+
+func root(w http.ResponseWriter, r *http.Request) {
 	data, err := ioutil.ReadFile("index.html")
 	if err != nil {
 		panic(err)
@@ -20,7 +23,7 @@ func root(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func slow(c web.C, w http.ResponseWriter, r *http.Request) {
+func slow(w http.ResponseWriter, r *http.Request) {
 	t1 := time.Now()
 	_, err := http.Get(fmt.Sprintf("http://localhost:%d/slow", Port))
 	if err != nil {
@@ -29,7 +32,7 @@ func slow(c web.C, w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<span class=\"label label-success\">success %s</span>", time.Now().Sub(t1))
 }
 
-func bad(c web.C, w http.ResponseWriter, r *http.Request) {
+func bad(w http.ResponseWriter, r *http.Request) {
 	t1 := time.Now()
 	_, err := http.Get(fmt.Sprintf("http://localhost:%d/bad", Port))
 	if err != nil {
@@ -43,7 +46,7 @@ func bad(c web.C, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func timeout(c web.C, w http.ResponseWriter, r *http.Request) {
+func timeout(w http.ResponseWriter, r *http.Request) {
 	t1 := time.Now()
 	_, err := http.Get(fmt.Sprintf("http://localhost:%d/timeout", Port))
 	if err != nil {
@@ -53,9 +56,14 @@ func timeout(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	goji.Get("/", root)
-	goji.Get("/slow", slow)
-	goji.Get("/bad", bad)
-	goji.Get("/timeout", timeout)
-	goji.Serve()
+	flag.Parse()
+
+	http.HandleFunc("/", root)
+	http.HandleFunc("/slow", slow)
+	http.HandleFunc("/bad", bad)
+	http.HandleFunc("/timeout", timeout)
+
+	if err := http.ListenAndServe(*addr, nil); err != nil {
+		log.Fatal(err)
+	}
 }
