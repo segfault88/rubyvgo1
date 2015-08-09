@@ -72,17 +72,19 @@ func scanServices(ws *websocket.Conn) {
 		done <- true
 	}()
 
-	for {
-		select {
-		case msg := <-messages:
-			json, err := json.Marshal(msg)
-			panicIfErr(err)
-			ws.WriteMessage(websocket.TextMessage, json)
-		case <-done:
-			log.Println("Scan done")
-			break
+	func() {
+		for {
+			select {
+			case msg := <-messages:
+				json, err := json.Marshal(msg)
+				panicIfErr(err)
+				ws.WriteMessage(websocket.TextMessage, json)
+			case <-done:
+				log.Println("Scan done")
+				return
+			}
 		}
-	}
+	}()
 }
 
 func callSlow(i int, j int, wg *sync.WaitGroup, r chan Result) {
