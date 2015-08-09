@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Bootstrap 3 Template</title>
+    <title>Go Simple Mode</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Bootstrap core CSS -->
@@ -14,7 +14,7 @@
     <![endif]-->
   </head>
   <body>
-    <h1>Go</h1>
+    <h1>Go Simple Mode</h1>
     <table class="table">
       <thead>
         <tr>
@@ -118,14 +118,30 @@
 
     <script type="text/javascript">
       $(document).ready(function() {
-        var conn = new WebSocket("ws://localhost:8880/ws");
-        conn.onclose = function(evt) {
-          console.log("websocket closed");
-        }
-        conn.onmessage = function(evt) {
-            // just straight eval it, boom!
-          eval(evt.data);
-        }
+        $(".a1, .a2").each(function(i, li) {
+          $.ajax({
+            url: "/slow",
+            success: function(data) {
+              $(li).html(data);
+            }
+          });
+        });
+        $(".a3, .a4").each(function(i, li) {
+          $.ajax({
+            url: "/bad",
+            success: function(data) {
+              $(li).html(data);
+            }
+          });
+        });
+        $(".a5").each(function(i, li) {
+          $.ajax({
+            url: "/timeout",
+            success: function(data) {
+              $(li).html(data);
+            }
+          });
+        });
       });
     </script>
   </body>

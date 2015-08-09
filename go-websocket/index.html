@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Ruby</title>
+    <title>Go websocket mode</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Bootstrap core CSS -->
@@ -14,7 +14,7 @@
     <![endif]-->
   </head>
   <body>
-    <h1>Ruby</h1>
+    <h1>Go websocket mode</h1>
     <table class="table">
       <thead>
         <tr>
@@ -118,30 +118,14 @@
 
     <script type="text/javascript">
       $(document).ready(function() {
-        $(".a1, .a2").each(function(i, li) {
-          $.ajax({
-            url: "/slow",
-            success: function(data) {
-              $(li).html(data);
-            }
-          });
-        });
-        $(".a3, .a4").each(function(i, li) {
-          $.ajax({
-            url: "/bad",
-            success: function(data) {
-              $(li).html(data);
-            }
-          });
-        });
-        $(".a5").each(function(i, li) {
-          $.ajax({
-            url: "/timeout",
-            success: function(data) {
-              $(li).html(data);
-            }
-          });
-        });
+        var conn = new WebSocket("ws://localhost:8880/ws");
+        conn.onclose = function(evt) {
+          console.log("websocket closed");
+        }
+        conn.onmessage = function(evt) {
+            // just straight eval it, boom!
+          eval(evt.data);
+        }
       });
     </script>
   </body>
