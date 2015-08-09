@@ -15,7 +15,7 @@ import (
 const APIPort = 8000
 
 var (
-	addr     = flag.String("addr", ":8880", "http service address")
+	addr     = flag.String("addr", ":8889", "http service address")
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -80,7 +80,7 @@ func callSlow(i int, j int, wg *sync.WaitGroup, r chan string) {
 	t1 := time.Now()
 	_, err := http.Get(fmt.Sprintf("http://localhost:%d/slow", APIPort))
 	panicIfErr(err)
-	r <- fmtResut(i, j, "info", "success", time.Now().Sub(t1))
+	r <- fmtResut(i, j, "success", "success", time.Now().Sub(t1))
 }
 
 func callBad(i int, j int, wg *sync.WaitGroup, r chan string) {
