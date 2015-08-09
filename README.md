@@ -1,4 +1,6 @@
-WIP, this is for a blog post I'm working on. Doesn't make a whole lot of sense yet.
+This is something put together for a blog post. See the post here: http://segfault88.github.io/posts/rubyvgo1/ - go read that, if you have questions/comments hit me up on twitter or here.
+
+It got a bit long...
 
 ## API
 
@@ -23,11 +25,27 @@ unicorn -p 8800 -c unicorn.rb
 
 Yes, this could be done better with eventmachine - but to mimic the situation in "real life" I have used unicorn here.
 
-## Go
+## Go simple
 
 Essentially the same thing as the Ruby version but in Go with the Gorilla websocket library. Run it with:
+```bash
+PORT=8880 go run main.go
+```
+
+It's a bit better. But the limit of outstanding ajax requests to 2 blocks it up. It would work much better than the ruby version for more users though.
+
+## Go Polling
+
 ```bash
 go run main.go
 ```
 
-It's much speedier, but maybe a little messy since it's a quick job...
+On port 8888. Much better, we kick off all the requests, then send the pending updates to the brower when it checks in / polls.
+
+## Go Websocket
+
+```bash
+go run main.go
+```
+
+On port 8889. Definately the best! Works heaps better, the update gets pushed out to the client browser just about right away.
