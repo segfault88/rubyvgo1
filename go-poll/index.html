@@ -123,7 +123,6 @@
             function(data) {
               $.each(data.results, function(i, r) {
                 $(".s" + r.service + " .a" + r.api).html('<span class="label label-' + r.css + '">' + r.text + "</span>")
-                console.log(r);
               });
 
               if(!data.done) {
@@ -133,7 +132,6 @@
         };
         $.ajax({url: "/scan",
           success: function(data) {
-            console.log("key: " + data);
             window.key = data;
             window.setTimeout(poll, 250);
           }});

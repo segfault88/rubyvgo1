@@ -123,8 +123,8 @@
           console.log("websocket closed");
         }
         conn.onmessage = function(evt) {
-            // just straight eval it, boom!
-          eval(evt.data);
+          r = $.parseJSON(evt.data);
+          $(".s" + r.service + " .a" + r.api).html('<span class="label label-' + r.css + '">' + r.text + "</span>");
         }
       });
     </script>

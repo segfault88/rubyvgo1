@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +14,13 @@ import (
 )
 
 const APIPort = 8000
+
+type Result struct {
+	Service int    `json:"service"`
+	Api     int    `json:"api"`
+	Css     string `json:"css"`
+	Text    string `json:"text"`
+}
 
 var (
 	addr     = flag.String("addr", ":8889", "http service address")
@@ -42,7 +50,7 @@ func wsRoute(w http.ResponseWriter, r *http.Request) {
 func scanServices(ws *websocket.Conn) {
 	defer ws.Close()
 
-	messages := make(chan string, 16)
+	messages := make(chan Result, 16)
 	var wg sync.WaitGroup
 
 	for i := 1; i < 11; i++ {
@@ -67,7 +75,9 @@ func scanServices(ws *websocket.Conn) {
 	for {
 		select {
 		case msg := <-messages:
-			ws.WriteMessage(websocket.TextMessage, []byte(msg))
+			json, err := json.Marshal(msg)
+			panicIfErr(err)
+			ws.WriteMessage(websocket.TextMessage, json)
 		case <-done:
 			log.Println("Scan done")
 			break
@@ -75,37 +85,33 @@ func scanServices(ws *websocket.Conn) {
 	}
 }
 
-func callSlow(i int, j int, wg *sync.WaitGroup, r chan string) {
+func callSlow(i int, j int, wg *sync.WaitGroup, r chan Result) {
 	defer wg.Done()
 	t1 := time.Now()
 	_, err := http.Get(fmt.Sprintf("http://localhost:%d/slow", APIPort))
 	panicIfErr(err)
-	r <- fmtResut(i, j, "success", "success", time.Now().Sub(t1))
+	r <- Result{i, j, "success", fmt.Sprintf("success %s", time.Now().Sub(t1))}
 }
 
-func callBad(i int, j int, wg *sync.WaitGroup, r chan string) {
+func callBad(i int, j int, wg *sync.WaitGroup, r chan Result) {
 	defer wg.Done()
 	t1 := time.Now()
 	_, err := http.Get(fmt.Sprintf("http://localhost:%d/bad", APIPort))
 	panicIfErr(err)
 	t := time.Now().Sub(t1)
 	if t.Seconds() < 0.5 {
-		r <- fmtResut(i, j, "success", "good", t)
+		r <- Result{i, j, "success", fmt.Sprintf("good %s", t)}
 	} else {
-		r <- fmtResut(i, j, "warning", "bad", t)
+		r <- Result{i, j, "warning", fmt.Sprintf("bad %s", t)}
 	}
 }
 
-func callTimeout(i int, j int, wg *sync.WaitGroup, r chan string) {
+func callTimeout(i int, j int, wg *sync.WaitGroup, r chan Result) {
 	defer wg.Done()
 	t1 := time.Now()
 	_, err := http.Get(fmt.Sprintf("http://localhost:%d/timeout", APIPort))
 	panicIfErr(err)
-	r <- fmtResut(i, j, "danger", "fail", time.Now().Sub(t1))
-}
-
-func fmtResut(i int, j int, class string, msg string, t time.Duration) string {
-	return fmt.Sprintf("$('.s%d .a%d').html('<span class=\"label label-%s\">%s %s</span>')", i, j, class, msg, t)
+	r <- Result{i, j, "danger", fmt.Sprintf("fail %s", time.Now().Sub(t1))}
 }
 
 func panicIfErr(err error) {
